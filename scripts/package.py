@@ -4,11 +4,13 @@
 import argparse
 import hashlib
 import io
-import re
+import shutil
 import subprocess
 import sys
 import zipfile
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,19 +69,17 @@ def main():
     arguments = parser.parse_args()
     commit = git("rev-parse", "--verify", "HEAD^{commit}").decode().strip()
     data = build_archive(resource_entries(arguments.project, commit))
-    output = ROOT / "dist" / arguments.project / "lan-upload-assets.zip"
-    output.parent.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(ZoneInfo("Asia/Singapore")).strftime("%Y%m%d%H%M%S")
+    output_dir = ROOT / "dist" / arguments.project
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output = output_dir / (timestamp + "_assets.zip")
     output.write_bytes(data)
     digest = hashlib.sha256(data).hexdigest()
     checksum = digest + "  " + output.name + "\n"
     checksum_path = output.with_name(digest + ".sha256")
     checksum_path.write_bytes(checksum.encode("ascii"))
-    for previous in output.parent.glob("*.sha256"):
-        if previous != checksum_path and (
-            previous.name == output.name + ".sha256"
-            or re.fullmatch(r"[0-9a-f]{64}", previous.stem)
-        ):
-            previous.unlink()
     print("commit=" + commit)
     print("zip=" + str(output))
     print("sha256=" + digest)

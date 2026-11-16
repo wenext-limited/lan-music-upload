@@ -33,7 +33,9 @@ python3 scripts/package.py Fungo
 
 打包当前 `HEAD` 已提交的内容。
 
-产物位于 `dist/<项目名>/`，包括 `lan-upload-assets.zip` 和 `<SHA256>.sha256` 校验文件。ZIP 内保留顶层 `active/`。
+产物位于 `dist/<项目名>/`，包括 `YYYYMMDDHHmmss_assets.zip` 和 `<SHA256>.sha256` 校验文件。文件名前缀使用新加坡时间（UTC+8），精确到秒。ZIP 内保留顶层 `active/`。
+
+每次打包会清空对应的 `dist/<项目名>/`，只保留本次 ZIP 和校验文件。
 
 脚本统一文件顺序、时间、权限和存储方式，同一项目、同一 Git 文件内容可生成相同 ZIP 和 SHA-256。发布新包时，同步更新客户端资源地址与 SHA-256 校验值。
 

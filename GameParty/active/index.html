@@ -8,11 +8,21 @@
   <link rel="shortcut icon" href="./static/common_app_logo.png">
   <link rel="apple-touch-icon" href="./static/common_app_logo.png">
   <style>
+    :root {
+      --page-background: #f5f7fa;
+      --surface: #fff;
+      --text: #222;
+      --border: rgba(55, 55, 55, 0.04);
+      --success: #0bdaa1;
+      --content-width: 594px;
+      --icon-size: 28px;
+      --brand-gradient: linear-gradient(124.26deg, #ffc805 0%, #ff2480 100%);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f0f0f0;
-      color: #222;
+      background: var(--page-background);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -21,202 +31,227 @@
       padding: 24px;
     }
     .card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 32px 48px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 55px 24px 36px;
       width: 100%;
-      max-width: 520px;
-      max-height: calc(100vh - 48px);
+      max-width: 1058px;
+      min-height: 568px;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      zoom: 1.2;
+      align-items: center;
     }
+    .card > * { width: 100%; max-width: var(--content-width); }
 
     /* Header */
     .header {
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 18px;
+      gap: 28px;
+      margin-bottom: 32px;
     }
     .logo {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      object-fit: cover;
+      width: 120px;
+      height: 120px;
+      border-radius: 26.087px;
+      object-fit: contain;
       flex-shrink: 0;
     }
+    .header-text { min-width: 0; }
     .header-text h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #111;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: 2px;
     }
-    .header-text .tagline {
-      font-size: 13px;
-      color: #888;
-      margin-top: 2px;
+    .description {
+      font-size: 24px;
+      line-height: 1.22;
+      margin-bottom: 32px;
+      overflow-wrap: anywhere;
     }
-
-    /* Subtitle */
-    .subtitle {
-      font-size: 13px;
-      color: #555;
-      margin-bottom: 22px;
-      line-height: 1.5;
-    }
+    .tagline, .subtitle { display: inline; }
 
     /* Buttons row */
     .btn-row {
       display: flex;
-      gap: 30px;
-      margin-bottom: 20px;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 59px;
     }
     .btn {
-      flex: 1;
-      padding: 12px;
-      border-radius: 50px;
+      width: 248px;
+      max-width: calc(50% - 12px);
+      height: 56px;
+      padding: 0 16px;
+      border-radius: 100px;
       border: none;
-      font-size: 15px;
+      font-family: inherit;
+      font-size: 18px;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.18s, transform 0.1s;
+      transition: opacity 0.18s;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 10px;
+      flex-shrink: 0;
     }
-    .btn:active { transform: scale(0.97); }
+    .btn:active { opacity: 0.8; }
+    .btn:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
     .btn-select {
-      background: #111;
+      background: var(--brand-gradient);
       color: #fff;
     }
     .btn-upload {
-      background: #111;
+      background: var(--text);
       color: #fff;
     }
     .btn-upload:disabled {
-      background: #ddd;
-      color: #aaa;
+      background: #ebecf0;
+      color: rgba(119, 119, 119, 0.6);
+      opacity: 0.6;
       cursor: not-allowed;
-      transform: none;
     }
-    .btn-select svg, .btn-upload svg {
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-    }
+    .btn img { flex-shrink: 0; }
+    .btn-upload:disabled img { filter: brightness(0.47); opacity: 0.6; }
 
     #file-input { display: none; }
     #file-section {
       flex: 1;
       min-height: 0;
+      max-height: max(160px, calc(100vh - 600px));
       overflow-y: auto;
-      padding-right: 4px;
     }
 
     /* File list */
     .file-list-label {
-      font-size: 13px;
-      color: #888;
+      font-size: 20px;
+      line-height: 24px;
       margin-bottom: 10px;
     }
     .file-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .file-item {
-      background: #f7f7f7;
-      border-radius: 10px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
+    .file-list:empty::before {
+      content: '';
+      display: block;
+      height: 83px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface) url('./static/music-empty.svg') center / 68px 68px no-repeat;
     }
-    .file-item-info { flex: 1; min-width: 0; }
+    .file-item {
+      background: #fefefe;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      min-height: 68px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto var(--icon-size);
+      align-content: center;
+      align-items: center;
+      column-gap: 8px;
+      row-gap: 7px;
+    }
+    /* 文件名与大小共用一行，进度条横跨二者，状态图标保持独立。 */
+    .file-item-info { display: contents; }
     .file-item-name {
-      font-size: 13px;
-      font-weight: 500;
-      color: #222;
+      grid-column: 1;
+      grid-row: 1;
+      font-size: 16px;
+      line-height: 20px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .file-item-name.has-bar { margin-bottom: 5px; }
     .file-item-bar-bg {
-      height: 3px;
-      background: #e0e0e0;
-      border-radius: 2px;
+      grid-column: 1 / 3;
+      grid-row: 2;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
       overflow: hidden;
       display: none;
     }
     .file-item-bar-bg.visible { display: block; }
     .file-item-bar {
       height: 100%;
-      background: #4cd6a8;
-      border-radius: 2px;
+      background: var(--success);
+      border-radius: 16px;
       width: 0%;
       transition: width 0.25s ease;
     }
     .file-item-size {
-      font-size: 12px;
-      color: #888;
-      flex-shrink: 0;
-      min-width: 44px;
+      grid-column: 2;
+      grid-row: 1;
+      font-size: 16px;
+      line-height: 20px;
       text-align: right;
     }
     .file-item-status {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
+      grid-column: 3;
+      grid-row: 1 / 3;
+      width: var(--icon-size);
+      height: var(--icon-size);
       display: flex;
       align-items: center;
       justify-content: center;
     }
+    .file-item-status:empty { display: none; }
     .file-item-status.clickable { cursor: pointer; }
     .file-item-remove {
-      width: 22px;
-      height: 22px;
+      grid-column: 3;
+      grid-row: 1 / 3;
+      width: var(--icon-size);
+      height: var(--icon-size);
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      background: url('./static/remove.svg') center no-repeat;
+      font-size: 0;
       border-radius: 50%;
-      background: #ccc;
-      color: #fff;
-      font-size: 12px;
-      line-height: 1;
-      transition: background 0.15s;
+      transition: opacity 0.15s;
     }
-    .file-item-remove:hover { background: #ff4d4d; }
+    .file-item-remove:hover, .file-item-status.clickable:hover { opacity: 0.7; }
 
     /* Done checkmark */
     .check-circle {
-      width: 22px;
-      height: 22px;
-      background: #4cd6a8;
+      width: var(--icon-size);
+      height: var(--icon-size);
+      background: var(--success);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .check-circle svg { width: 12px; height: 12px; }
+    .check-circle svg { width: 16px; height: 16px; }
 
     /* Error */
     .status-error {
       margin-top: 14px;
       flex-shrink: 0;
-      border-radius: 10px;
+      border-radius: 16px;
       padding: 12px 14px;
-      font-size: 13px;
+      font-size: 16px;
+      line-height: 1.5;
       display: flex;
       align-items: center;
       gap: 8px;
       background: #fff2f2;
       color: #d44;
+      overflow-wrap: anywhere;
     }
     .hidden { display: none !important; }
+    @media (max-width: 680px) {
+      body { padding: 16px; }
+      .card { padding: 32px 24px; }
+      .header { flex-wrap: wrap; justify-content: center; }
+      .header-text { width: 100%; text-align: center; }
+      .btn-row { flex-wrap: wrap; justify-content: center; gap: 16px; }
+      .btn { max-width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -225,19 +260,21 @@
       <img class="logo" src="./static/common_app_logo.png" alt="GameParty logo">
       <div class="header-text">
         <h1>High-quality social</h1>
-        <div class="tagline">Device connected, you can upload now.</div>
       </div>
     </div>
 
-    <p class="subtitle">Tips: MP3 / AAC / M4A / FLAC / WAV supported, max 10MB per track</p>
+    <div class="description">
+      <p class="tagline">Device connected, you can upload now.</p>
+      <p class="subtitle">Tips: MP3 / AAC / M4A / FLAC / WAV supported, max 10MB per track</p>
+    </div>
 
     <div class="btn-row">
       <button class="btn btn-select" id="select-btn">
-        <img src="./static/select.png" width="16" height="16" alt="select">
+        <img src="./static/select.png" width="28" height="28" alt="select">
         Select
       </button>
       <button class="btn btn-upload" id="upload-btn" disabled>
-        <img src="./static/upload.png" width="16" height="16" alt="upload">
+        <img src="./static/upload.png" width="28" height="28" alt="upload">
         UPLoad
       </button>
     </div>
@@ -245,7 +282,7 @@
     <input type="file" id="file-input" accept=".mp3,.aac,.m4a,.flac,.wav" multiple>
 
     <div id="file-section">
-      <div class="file-list-label" id="selected-label" style="display:none">Selected</div>
+      <div class="file-list-label" id="selected-label">Selected</div>
       <div class="file-list" id="file-list"></div>
     </div>
 
@@ -260,7 +297,6 @@
     const uploadBtn = document.getElementById('upload-btn');
     const fileInput = document.getElementById('file-input');
     const fileList = document.getElementById('file-list');
-    const selectedLabel = document.getElementById('selected-label');
     const statusError = document.getElementById('status-error');
     const errorMsg = document.getElementById('error-msg');
 
@@ -335,7 +371,6 @@
       entry.removeEl = removeEl;
 
       fileList.appendChild(item);
-      selectedLabel.style.display = 'block';
     }
 
     function setFileUploading(entry) {
@@ -374,7 +409,6 @@
     function removeEntry(entry) {
       files = files.filter(f => f !== entry);
       entry.el.remove();
-      if (files.length === 0) selectedLabel.style.display = 'none';
       updateUploadBtn();
     }
 

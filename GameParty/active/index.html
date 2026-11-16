@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameParty Music Uploader</title>
+  <link rel="icon" type="image/png" href="./static/common_app_logo.png">
+  <link rel="shortcut icon" href="./static/common_app_logo.png">
+  <link rel="apple-touch-icon" href="./static/common_app_logo.png">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f0f0;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px 48px 28px;
+      width: 100%;
+      max-width: 520px;
+      max-height: calc(100vh - 48px);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      zoom: 1.2;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .header-text h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111;
+    }
+    .header-text .tagline {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Subtitle */
+    .subtitle {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    /* Buttons row */
+    .btn-row {
+      display: flex;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 50px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.18s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-select {
+      background: #111;
+      color: #fff;
+    }
+    .btn-upload {
+      background: #111;
+      color: #fff;
+    }
+    .btn-upload:disabled {
+      background: #ddd;
+      color: #aaa;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-select svg, .btn-upload svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    #file-input { display: none; }
+    #file-section {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* File list */
+    .file-list-label {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .file-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .file-item {
+      background: #f7f7f7;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .file-item-info { flex: 1; min-width: 0; }
+    .file-item-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #222;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .file-item-name.has-bar { margin-bottom: 5px; }
+    .file-item-bar-bg {
+      height: 3px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+    .file-item-bar-bg.visible { display: block; }
+    .file-item-bar {
+      height: 100%;
+      background: #4cd6a8;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+    .file-item-size {
+      font-size: 12px;
+      color: #888;
+      flex-shrink: 0;
+      min-width: 44px;
+      text-align: right;
+    }
+    .file-item-status {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .file-item-status.clickable { cursor: pointer; }
+    .file-item-remove {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+      background: #ccc;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1;
+      transition: background 0.15s;
+    }
+    .file-item-remove:hover { background: #ff4d4d; }
+
+    /* Done checkmark */
+    .check-circle {
+      width: 22px;
+      height: 22px;
+      background: #4cd6a8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .check-circle svg { width: 12px; height: 12px; }
+
+    /* Error */
+    .status-error {
+      margin-top: 14px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff2f2;
+      color: #d44;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <img class="logo" src="./static/common_app_logo.png" alt="GameParty logo">
+      <div class="header-text">
+        <h1>High-quality social</h1>
+        <div class="tagline">Device connected, you can upload now.</div>
+      </div>
+    </div>
+
+    <p class="subtitle">Tips: MP3 / AAC / M4A / FLAC / WAV supported, max 10MB per track</p>
+
+    <div class="btn-row">
+      <button class="btn btn-select" id="select-btn">
+        <img src="./static/select.png" width="16" height="16" alt="select">
+        Select
+      </button>
+      <button class="btn btn-upload" id="upload-btn" disabled>
+        <img src="./static/upload.png" width="16" height="16" alt="upload">
+        UPLoad
+      </button>
+    </div>
+
+    <input type="file" id="file-input" accept=".mp3,.aac,.m4a,.flac,.wav" multiple>
+
+    <div id="file-section">
+      <div class="file-list-label" id="selected-label" style="display:none">Selected</div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+
+    <div class="status-error hidden" id="status-error">
+      <span>⚠️</span>
+      <span id="error-msg">Upload failed. Please try again.</span>
+    </div>
+  </div>
+
+  <script>
+    const selectBtn = document.getElementById('select-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const selectedLabel = document.getElementById('selected-label');
+    const statusError = document.getElementById('status-error');
+    const errorMsg = document.getElementById('error-msg');
+
+    // { file, state: 'pending' | 'uploading' | 'done' | 'error', el, barEl, progress }
+    let files = [];
+
+    function formatSize(bytes) {
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'K';
+      return (bytes / 1024 / 1024).toFixed(1) + 'M';
+    }
+
+    function updateUploadBtn() {
+      const hasPending = files.some(f => f.state === 'pending');
+      uploadBtn.disabled = !hasPending;
+    }
+
+    function showError(message) {
+      errorMsg.textContent = message || 'Upload failed. Please try again.';
+      statusError.classList.remove('hidden');
+      statusError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function renderFile(entry) {
+      const item = document.createElement('div');
+      item.className = 'file-item';
+
+      const info = document.createElement('div');
+      info.className = 'file-item-info';
+
+      const name = document.createElement('div');
+      name.className = 'file-item-name';
+      name.textContent = entry.file.name.replace(/\.(mp3|aac|m4a|flac|wav)$/i, '');
+      info.appendChild(name);
+
+      const barBg = document.createElement('div');
+      barBg.className = 'file-item-bar-bg'; // hidden by default
+      const bar = document.createElement('div');
+      bar.className = 'file-item-bar';
+      barBg.appendChild(bar);
+      info.appendChild(barBg);
+
+      const size = document.createElement('div');
+      size.className = 'file-item-size';
+      size.textContent = formatSize(entry.file.size);
+
+      const statusEl = document.createElement('div');
+      statusEl.className = 'file-item-status';
+
+      const removeEl = document.createElement('div');
+      removeEl.className = 'file-item-remove';
+      removeEl.textContent = '×';
+      removeEl.title = 'Remove';
+      removeEl.addEventListener('click', () => {
+        if (entry.state === 'uploading') {
+          // Cancel the current upload.
+          if (entry.xhr) entry.xhr.abort();
+        }
+        removeEntry(entry);
+        updateUploadBtn();
+      });
+
+      item.appendChild(info);
+      item.appendChild(size);
+      item.appendChild(statusEl);
+      item.appendChild(removeEl);
+
+      entry.el = item;
+      entry.nameEl = name;
+      entry.barBgEl = barBg;
+      entry.barEl = bar;
+      entry.statusEl = statusEl;
+      entry.removeEl = removeEl;
+
+      fileList.appendChild(item);
+      selectedLabel.style.display = 'block';
+    }
+
+    function setFileUploading(entry) {
+      entry.state = 'uploading';
+      // Show the progress bar and add spacing under the filename.
+      entry.nameEl.classList.add('has-bar');
+      entry.barBgEl.classList.add('visible');
+      // Keep the remove button visible so the user can cancel the upload.
+      entry.removeEl.title = 'Cancel upload';
+    }
+
+    function setFileDone(entry) {
+      entry.state = 'done';
+      entry.barEl.style.width = '100%';
+      entry.removeEl.style.display = 'none';
+      entry.statusEl.innerHTML = `<div class="check-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg></div>`;
+      entry.statusEl.classList.add('clickable');
+      entry.statusEl.title = 'Remove';
+      entry.statusEl.onclick = () => {
+        removeEntry(entry);
+      };
+    }
+
+    function setFileError(entry, msg) {
+      entry.state = 'error';
+      entry.barEl.style.background = '#ff4d4d';
+      entry.removeEl.style.display = 'flex';
+      entry.statusEl.classList.remove('clickable');
+      entry.statusEl.title = '';
+      entry.statusEl.onclick = null;
+      entry.removeEl.title = 'Remove';
+      entry.statusEl.textContent = '';
+      showError(msg);
+    }
+
+    function removeEntry(entry) {
+      files = files.filter(f => f !== entry);
+      entry.el.remove();
+      if (files.length === 0) selectedLabel.style.display = 'none';
+      updateUploadBtn();
+    }
+
+    selectBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      statusError.classList.add('hidden');
+      Array.from(e.target.files).forEach(file => {
+        const lower = file.name.toLowerCase();
+        if (!['.mp3', '.aac', '.m4a', '.flac', '.wav'].some(ext => lower.endsWith(ext))) return;
+        const entry = { file, state: 'pending', xhr: null };
+        files.push(entry);
+        renderFile(entry);
+      });
+      fileInput.value = '';
+      updateUploadBtn();
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+      const pending = files.filter(f => f.state === 'pending');
+      if (pending.length === 0) return;
+      uploadBtn.disabled = true;
+      statusError.classList.add('hidden');
+
+      for (const entry of pending) {
+        // Skip entries that were removed while waiting in this loop.
+        if (!files.includes(entry)) continue;
+
+        setFileUploading(entry);
+        const formData = new FormData();
+        formData.append('file', entry.file, entry.file.name);
+
+        try {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            entry.xhr = xhr;
+            xhr.open('POST', '/upload');
+            xhr.upload.addEventListener('progress', (e) => {
+              if (e.lengthComputable) {
+                entry.barEl.style.width = Math.round(e.loaded / e.total * 100) + '%';
+              }
+            });
+            xhr.addEventListener('load', () => {
+              entry.xhr = null;
+              try {
+                const json = JSON.parse(xhr.responseText);
+                if (json.success) resolve();
+                else reject(json.error || 'upload_failed');
+              } catch { reject('parse_error'); }
+            });
+            xhr.addEventListener('error', () => { entry.xhr = null; reject('network_error'); });
+            xhr.addEventListener('abort', () => { entry.xhr = null; reject('aborted'); });
+            xhr.send(formData);
+          });
+          setFileDone(entry);
+        } catch (errCode) {
+          if (errCode === 'aborted') {
+            // The user cancelled the upload and the entry was already removed.
+          } else {
+            const messages = {
+              'unsupported_format': 'Unsupported format. Please choose an MP3, AAC, M4A, FLAC or WAV file.',
+              'file_too_large': 'File is too large. Max 10MB per track.',
+              'upload_in_progress': 'An upload is already in progress. Please wait.',
+              'no_file': 'No file was detected.',
+              'duplicate_file': 'This track already exists.',
+              'invalid_audio': 'The audio file is corrupted or unsupported.',
+              'network_error': 'Network connection failed. Please check your Wi-Fi.',
+            };
+            setFileError(entry, messages[errCode] || 'Upload failed. Please try again.');
+          }
+        }
+      }
+
+      updateUploadBtn();
+    });
+  </script>
+</body>
+</html>

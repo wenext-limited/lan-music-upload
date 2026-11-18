@@ -173,7 +173,7 @@
       overflow: hidden;
       display: none;
     }
-    .file-item-bar-bg.visible { display: block; }
+    .file-item.has-progress .file-item-bar-bg { display: block; }
     .file-item-bar {
       height: 100%;
       background: var(--success);
@@ -190,7 +190,7 @@
     }
     .file-item-status {
       grid-column: 3;
-      grid-row: 1 / 3;
+      grid-row: 1;
       width: var(--icon-size);
       height: var(--icon-size);
       display: flex;
@@ -201,7 +201,7 @@
     .file-item-status.clickable { cursor: pointer; }
     .file-item-remove {
       grid-column: 3;
-      grid-row: 1 / 3;
+      grid-row: 1;
       width: var(--icon-size);
       height: var(--icon-size);
       flex-shrink: 0;
@@ -209,24 +209,16 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      background: url('./static/remove.svg') center no-repeat;
+      background: url('./static/delete.svg') center no-repeat;
       font-size: 0;
       border-radius: 50%;
       transition: opacity 0.15s;
     }
-    .file-item-remove:hover, .file-item-status.clickable:hover { opacity: 0.7; }
-
-    /* Done checkmark */
-    .check-circle {
-      width: var(--icon-size);
-      height: var(--icon-size);
-      background: var(--success);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .file-item.has-progress .file-item-status,
+    .file-item.has-progress .file-item-remove {
+      grid-row: 1 / 3;
     }
-    .check-circle svg { width: 16px; height: 16px; }
+    .file-item-remove:hover, .file-item-status.clickable:hover { opacity: 0.7; }
 
     /* Error */
     .status-error {
@@ -270,11 +262,11 @@
 
     <div class="btn-row">
       <button class="btn btn-select" id="select-btn">
-        <img src="./static/select.png" width="28" height="28" alt="select">
+        <img src="./static/select.svg" width="28" height="28" alt="select">
         Select
       </button>
       <button class="btn btn-upload" id="upload-btn" disabled>
-        <img src="./static/upload.png" width="28" height="28" alt="upload">
+        <img src="./static/upload.svg" width="28" height="28" alt="upload">
         UPLoad
       </button>
     </div>
@@ -364,8 +356,6 @@
       item.appendChild(removeEl);
 
       entry.el = item;
-      entry.nameEl = name;
-      entry.barBgEl = barBg;
       entry.barEl = bar;
       entry.statusEl = statusEl;
       entry.removeEl = removeEl;
@@ -375,9 +365,7 @@
 
     function setFileUploading(entry) {
       entry.state = 'uploading';
-      // Show the progress bar and add spacing under the filename.
-      entry.nameEl.classList.add('has-bar');
-      entry.barBgEl.classList.add('visible');
+      entry.el.classList.add('has-progress');
       // Keep the remove button visible so the user can cancel the upload.
       entry.removeEl.title = 'Cancel upload';
     }
@@ -386,7 +374,7 @@
       entry.state = 'done';
       entry.barEl.style.width = '100%';
       entry.removeEl.style.display = 'none';
-      entry.statusEl.innerHTML = `<div class="check-circle"><svg viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg></div>`;
+      entry.statusEl.innerHTML = '<img src="./static/done.svg" width="28" height="28" alt="Uploaded">';
       entry.statusEl.classList.add('clickable');
       entry.statusEl.title = 'Remove';
       entry.statusEl.onclick = () => {
